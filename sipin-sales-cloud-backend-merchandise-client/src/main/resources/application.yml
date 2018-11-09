@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: merchandise-client
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        prefer-ip-address: true
+  zipkin:
+      base-url: http://localhost:8006
+server:
+  port: 9091
+
+#开启Feign对Hystrix的支持
+feign:
+  hystrix:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+
+hystrix:
+  command:
+    default:
+      fallback:
+        isolation:
+          semaphore:
+            maxConcurrentRequests: 100 # 调用线程允许请求HystrixCommand.GetFallback()的最大数量，默认10。超出时将会有异常抛出
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 30000 #缺省为1000
+          strategy: SEMAPHORE
+          semaphore:
+            maxConcurrentRequests: 100 # 最大请求并发数
+  threadpool:
+    default:
+      maximumSize: 20
+ribbon:
+  eager-load:
+    # 启动饥饿加载
+    enabled: true
+    clients: sales-member-service,merchandise-service
+  ConnectTimeout: 10000
+  ReadTimeout: 5000
+
+swagger:
+  enabled: true
+  base-package: cn.sipin.cloud.merchandise.client.controller
+
+thirdparty:
+  erp:
+    warehouse:
+      serverUrl: http://localhost:8080/warehouse
+    warehouse-stock:
+      serverUrl: http://localhost:8080/warehouse-stock
+
+logging:
+  level:
+    cn.sipin.cloud.merchandise.client: DEBUG

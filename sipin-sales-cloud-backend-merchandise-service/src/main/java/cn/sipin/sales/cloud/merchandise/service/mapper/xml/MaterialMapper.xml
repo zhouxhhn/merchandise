@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sipin.sales.cloud.merchandise.service.mapper.MaterialMapper">
+
+    <!-- 开启基于redis的二级缓存 -->
+    <!--eviction：缓存的回收策略-->
+    <!--LRU - 最近最少使用，移除最长时间不被使用的对象-->
+    <!--FIFO - 先进先出，按对象进入缓存的顺序来移除它们-->
+    <!--SOFT - 软引用，移除基于垃圾回收器状态和软引用规则的对象-->
+    <!--WEAK - 弱引用，更积极地移除基于垃圾收集器和弱引用规则的对象-->
+    <!--默认的是LRU-->
+
+    <!--flushInterval：缓存刷新间隔-->
+    <!--缓存多长时间清空一次，默认不清空，设置一个毫秒值-->
+
+    <!--readOnly：是否只读-->
+    <!--true：只读：mybatis认为所有从缓存中获取数据的操作都是只读操作，不会修改数据。-->
+    <!--mybatis为了加快获取数据，直接就会将数据在缓存中的引用交给用户 。不安全，速度快-->
+    <!--false：读写(默认)：mybatis觉得获取的数据可能会被修改-->
+    <!--mybatis会利用序列化&反序列化的技术克隆一份新的数据给你。安全，速度相对慢-->
+
+    <!--size：缓存存放多少个元素-->
+
+    <!--type：指定自定义缓存的全类名(实现Cache接口即可)-->
+
+    <cache type="cn.sipin.sales.cloud.merchandise.service.util.RedisCache">
+        <property name="eviction" value="LRU"/>
+        <property name="flushInterval" value="3600"/>
+        <property name="size" value="9216"/>
+        <property name="readOnly" value="false"/>
+    </cache>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.sipin.cloud.merchandise.pojo.Material">
+        <id column="id" property="id"/>
+        <result column="material_id" property="materialId"/>
+        <result column="number" property="number"/>
+        <result column="name" property="name"/>
+        <result column="specification" property="specification"/>
+        <result column="texture" property="texture"/>
+        <result column="color" property="color"/>
+        <result column="spu" property="spu"/>
+        <result column="sku" property="sku"/>
+        <result column="status" property="status"/>
+        <result column="forbid_status" property="forbidStatus"/>
+        <result column="img_path" property="imgPath"/>
+        <result column="amount" property="amount"/>
+        <result column="stock_qty" property="stockQty"/>
+        <result column="created_at" property="createdAt" javaType="java.time.LocalDateTime"/>
+        <result column="updated_at" property="updatedAt" javaType="java.time.LocalDateTime"/>
+    </resultMap>
+
+    <sql id="materialWithoutStock">
+    `number`,
+    `name`,
+    `specification`,
+    `texture`,
+    `color`,
+    `spu`,
+    `sku`,
+    `status`,
+    `forbid_status`,
+    `img_path`,
+    `amount`
+  </sql>
+    <sql id="materialWithStock">
+    `number`,
+    `name`,
+    `specification`,
+    `texture`,
+    `color`,
+    `spu`,
+    `sku`,
+    `status`,
+    `forbid_status`,
+    `img_path`,
+    `amount`,
+    `stock_qty`
+  </sql>
+    <insert id="insertIgnore" flushCache="true">
+        INSERT IGNORE INTO `material` (
+        `material_id`,
+        <if test="material.getMaterialId() != null">
+            `number`,
+        </if>
+        <if test="material.getName() != null">
+            `name`,
+        </if>
+
+        <if test="material.getSpecification() != null">
+            `specification`,
+        </if>
+
+        <if test="material.getTexture() != null">
+            `texture`,
+        </if>
+
+        <if test="material.getColor() != null">
+            `color`,
+        </if>
+
+
+        <if test="material.getSpu() != null">
+            `spu`,
+        </if>
+
+
+        <if test="material.getSku() != null">
+            `sku`,
+        </if>
+
+
+        <if test="material.getStatus() != null">
+            `status`,
+        </if>
+
+        <if test="material.getForbidStatus() != null">
+            `forbid_status`,
+        </if>
+
+        <if test="material.getImgPath() != null">
+            `img_path`,
+        </if>
+
+        <if test="material.getAmount() != null">
+            `amount`,
+        </if>
+
+
+        <if test="material.getStockQty() != null">
+            `stock_qty`,
+        </if>
+        `created_at`
+        )
+        VALUES
+        (
+        #{material.materialId},
+        <if test="material.getMaterialId() != null">
+            #{material.number},
+        </if>
+
+        <if test="material.getName() != null">
+            #{material.name},
+        </if>
+
+        <if test="material.getSpecification() != null">
+            #{material.specification},
+        </if>
+
+        <if test="material.getTexture() != null">
+            #{material.texture},
+        </if>
+
+        <if test="material.getColor() != null">
+            #{material.color},
+        </if>
+
+
+        <if test="material.getSpu() != null">
+            #{material.spu},
+        </if>
+
+
+        <if test="material.getSku() != null">
+            #{material.sku},
+        </if>
+
+
+        <if test="material.getStatus() != null">
+            #{material.status},
+        </if>
+
+        <if test="material.getForbidStatus() != null">
+            #{material.forbidStatus},
+        </if>
+
+        <if test="material.getImgPath() != null">
+            #{material.imgPath},
+        </if>
+
+        <if test="material.getAmount() != null">
+            #{material.amount},
+        </if>
+
+
+        <if test="material.getStockQty() != null">
+            #{material.stockQty},
+        </if>
+        now()
+        )
+
+    </insert>
+
+    <select id="selectMaterialPage" resultType="cn.sipin.cloud.merchandise.pojo.Material">
+        (SELECT
+        <include refid="materialWithStock"/>
+        FROM `material`
+        <where>
+            <if test="request.getSkuSn() != null">
+                AND `sku` = #{request.skuSn}
+            </if>
+            <if test="request.getSkuNo() != null">
+                <bind name="noLike" value="request.getSkuNo() + '%'"/>
+                AND `number` LIKE #{noLike}
+            </if>
+            <if test="request.getSpu() != null">
+                AND `spu` = #{request.spu}
+            </if>
+            <if test="request.getForbidStatusId() != null">
+                AND `forbid_status` = #{request.forbidStatusId}
+            </if>
+            <if test="request.getSkuName() != null">
+                <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                AND `name` LIKE #{nameLike}
+            </if>
+
+            <if test="request.getStatus() != null">
+                AND `status` IN
+                <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY `material_id` DESC limit 9999999
+        )
+        union
+            (SELECT  `number`,  `name`,`specification`,`texture`,`color`,null as `spu`,`sku`,`status`, null as `forbid_status`, null as `img_path`,`amount`, null as `stock_qty`
+            FROM `material_group`
+            <where>
+                <if test="request.getSkuSn() != null">
+                    AND `sku` = #{request.skuSn}
+                </if>
+                <if test="request.getSkuNo() != null">
+                    <bind name="noLike" value="request.getSkuNo() + '%'"/>
+                    AND `number` LIKE #{noLike}
+                </if>
+
+                <if test="request.getSkuName() != null">
+                    <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                    AND `name` LIKE #{nameLike}
+                </if>
+
+                <if test="request.getStatus() != null">
+                    AND `status` IN
+                    <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                        #{status}
+                    </foreach>
+                </if>
+            </where>
+            ORDER BY `material_id` DESC  limit 9999999
+        )
+        <if test="limit != null and offset != null">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="selectWithoutStockPage" resultType="cn.sipin.cloud.merchandise.pojo.Material" useCache="true">
+        ( SELECT
+        <include refid="materialWithoutStock"/>
+        FROM `material`
+        <where>
+            <if test="request.getSkuSn() != null">
+                AND `sku` = #{request.skuSn}
+            </if>
+            <if test="request.getSkuNo() != null">
+                <bind name="noLike" value="request.getSkuNo() + '%'"/>
+                AND `number` LIKE #{noLike}
+            </if>
+            <if test="request.getSpu() != null">
+                AND `spu` = #{request.spu}
+            </if>
+            <if test="request.getForbidStatusId() != null">
+                AND `forbid_status` = #{request.forbidStatusId}
+            </if>
+            <if test="request.getStatus() != null">
+                AND `status` IN
+                <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="request.getSkuName() != null">
+                <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                AND `name` LIKE #{nameLike}
+            </if>
+        </where>
+        ORDER BY `material_id` DESC  limit 9999999
+        )
+        union
+        (SELECT  `number`,  `name`,`specification`,`texture`,`color`,null as `spu`,`sku`,`status`, null as `forbid_status`, null as `img_path`,`amount`
+        FROM `material_group`
+        <where>
+            <if test="request.getSkuSn() != null">
+                AND `sku` = #{request.skuSn}
+            </if>
+            <if test="request.getSkuNo() != null">
+                <bind name="noLike" value="'%' +request.getSkuNo() + '%'"/>
+                AND `number` LIKE #{noLike}
+            </if>
+
+            <if test="request.getSkuName() != null">
+                <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                AND `name` LIKE #{nameLike}
+            </if>
+
+            <if test="request.getStatus() != null">
+                AND `status` IN
+                <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY `material_id` DESC  limit 9999999
+        )
+        <if test="limit != null and offset != null">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="selectMaterialPageCount" resultType="java.lang.Integer" useCache="true">
+       SELECT sum(ct) from (( SELECT COUNT(*) as ct FROM `material`
+        <where>
+            1 = 1
+            <if test="request.getSkuSn() != null">
+                AND `sku` = #{request.skuSn}
+            </if>
+            <if test="request.getSkuNo() != null">
+                <bind name="noLike" value="request.getSkuNo() + '%'"/>
+                AND `number` LIKE #{noLike}
+            </if>
+            <if test="request.getSpu() != null">
+                AND `spu` = #{request.spu}
+            </if>
+            <if test="request.getForbidStatusId() != null">
+                AND `forbid_status` = #{request.forbidStatusId}
+            </if>
+            <if test="request.getStatus() != null">
+                AND `status` IN
+                <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="request.getSkuName() != null">
+                <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                AND `name` LIKE #{nameLike}
+            </if>
+        </where>
+        )
+        union
+        (SELECT  count(*) as ct from `material_group`
+        <where>
+            <if test="request.getSkuSn() != null">
+                AND `sku` = #{request.skuSn}
+            </if>
+            <if test="request.getSkuNo() != null">
+                <bind name="noLike" value="request.getSkuNo() + '%'"/>
+                AND `number` LIKE #{noLike}
+            </if>
+
+            <if test="request.getSkuName() != null">
+                <bind name="nameLike" value="'%' + request.getSkuName() + '%'"/>
+                AND `name` LIKE #{nameLike}
+            </if>
+
+            <if test="request.getStatus() != null">
+                AND `status` IN
+                <foreach item="status" collection="request.getStatus()" index="index" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+        </where>
+        )) as ma
+
+    </select>
+    <select id="selectByNos" resultType="cn.sipin.cloud.merchandise.pojo.Material">
+        SELECT *
+        FROM `material`
+        <where>
+            `number` IN
+            <foreach item="no" collection="skuNoList" index="index" open="(" separator="," close=")">
+                #{no}
+            </foreach>
+        </where>
+        union
+        select material_id,number,name,specification,texture,color,null as spu,sku,status,null as forbid_status,
+        null as img_path,amount,null as stock_qty,created_at,updated_at from material_group
+        <where>
+            `number` IN
+            <foreach item="no" collection="skuNoList" index="index" open="(" separator="," close=")">
+                #{no}
+            </foreach>
+        </where>
+    </select>
+
+    <select id="selectBySns" resultType="cn.sipin.cloud.merchandise.pojo.Material" useCache="false">
+        SELECT *
+        FROM `material`
+        <where>
+            `sku` IN
+            <foreach item="skuSn" collection="skuSnList" index="index" open="(" separator="," close=")">
+                #{skuSn}
+            </foreach>
+        </where>
+        union
+        select material_id,number,name,specification,texture,color,null as spu,sku,status,null as forbid_status,
+        null as img_path,amount,null as stock_qty,created_at,updated_at from material_group
+        <where>
+            `sku` IN
+            <foreach item="skuSn" collection="skuSnList" index="index" open="(" separator="," close=")">
+                #{skuSn}
+            </foreach>
+        </where>
+
+    </select>
+
+    <select id="getskuBygroupNumber" resultType="cn.sipin.cloud.merchandise.pojo.Material" useCache="false">
+        select ma.material_id,ma.name,ma.specification,ma.texture,ma.color,ma.number,ma.sku,ma.spu,ma.amount,gma.qty as stock_qty from material ma left join material_groups_materials gma on ma.material_id=gma.material_id
+        left join material_group g on gma.group_id = g.material_id where g.number=#{skuNumber}
+    </select>
+
+    <select id="selectOnlySnAndNoList" resultMap="BaseResultMap" useCache="false">
+        SELECT `sku`,`number`
+        FROM `material`
+         UNION
+        select `sku`,`number` from `material_group`
+    </select>
+
+
+</mapper>

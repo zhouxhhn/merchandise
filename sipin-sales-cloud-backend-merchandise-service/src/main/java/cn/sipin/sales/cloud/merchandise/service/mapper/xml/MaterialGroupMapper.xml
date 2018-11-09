@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sipin.sales.cloud.merchandise.service.mapper.MaterialGroupMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.sipin.cloud.merchandise.pojo.MaterialGroup">
+        <id column="material_id" property="materialId" />
+        <result column="number" property="number" />
+        <result column="name" property="name" />
+        <result column="specification" property="specification" />
+        <result column="texture" property="texture" />
+        <result column="color" property="color" />
+        <result column="sku" property="sku" />
+        <result column="status" property="status" />
+        <result column="amount" property="amount" />
+        <result column="created_at" property="createdAt" />
+        <result column="updated_at" property="updatedAt" />
+    </resultMap>
+
+    <insert id="insertGroup" flushCache="true">
+        INSERT IGNORE INTO `material_group` (
+        `material_id`,
+        <if test="materialGroup.getNumber() != null">
+            `number`,
+        </if>
+        <if test="materialGroup.getName() != null">
+            `name`,
+        </if>
+
+        <if test="materialGroup.getSpecification() != null">
+            `specification`,
+        </if>
+
+        <if test="materialGroup.getTexture() != null">
+            `texture`,
+        </if>
+
+        <if test="materialGroup.getColor() != null">
+            `color`,
+        </if>
+
+
+        <if test="materialGroup.getStatus() != null">
+            `status`,
+        </if>
+
+
+        <if test="materialGroup.getSku() != null">
+            `sku`,
+        </if>
+
+
+        <if test="materialGroup.getAmount() != null">
+            `amount`,
+        </if>
+        `created_at`
+        )
+        VALUES
+        (
+        #{materialGroup.materialId},
+        <if test="materialGroup.getMaterialId() != null">
+            #{materialGroup.number},
+        </if>
+
+        <if test="materialGroup.getName() != null">
+            #{materialGroup.name},
+        </if>
+
+        <if test="materialGroup.getSpecification() != null">
+            #{materialGroup.specification},
+        </if>
+
+        <if test="materialGroup.getTexture() != null">
+            #{materialGroup.texture},
+        </if>
+
+        <if test="materialGroup.getColor() != null">
+            #{materialGroup.color},
+        </if>
+
+        <if test="materialGroup.getStatus() != null">
+            #{materialGroup.status},
+        </if>
+
+        <if test="materialGroup.getSku() != null">
+            #{materialGroup.sku},
+        </if>
+
+        <if test="materialGroup.getAmount() != null">
+            #{materialGroup.amount},
+        </if>
+        now()
+        )
+
+    </insert>
+
+</mapper>

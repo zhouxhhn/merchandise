@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.sipin.sales.cloud.merchandise.service.mapper.MaterialGroupsMaterialsMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="cn.sipin.cloud.merchandise.pojo.MaterialGroupsMaterials">
+        <id column="id" property="id" />
+        <result column="group_id" property="groupId" />
+        <result column="material_id" property="materialId" />
+        <result column="qty" property="qty" />
+    </resultMap>
+
+    <insert id="ignoreInsert" flushCache="true">
+        INSERT IGNORE INTO `material_groups_materials` (
+        `id`
+        <if test="materialGroupsMaterials.getGroupId() != null">
+            ,`group_id`
+        </if>
+        <if test="materialGroupsMaterials.getMaterialId() != null">
+            ,`material_id`
+        </if>
+        <if test="materialGroupsMaterials.getQty() != null">
+            ,`qty`
+        </if>
+        )
+        VALUES
+        (
+        #{materialGroupsMaterials.id}
+        <if test="materialGroupsMaterials.getGroupId() != null">
+           , #{materialGroupsMaterials.groupId}
+        </if>
+
+        <if test="materialGroupsMaterials.getMaterialId() != null">
+           , #{materialGroupsMaterials.materialId}
+        </if>
+
+        <if test="materialGroupsMaterials.getQty() != null">
+           , #{materialGroupsMaterials.qty}
+        </if>
+        )
+
+    </insert>
+
+</mapper>
